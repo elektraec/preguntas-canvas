@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Convierte bancos de preguntas CSV en paquetes QTI para Canvas. Procesamiento local en tu navegador, con puntuación y retroalimentación.">
+  <meta name="theme-color" content="#a53166">
+  <title>Preguntas a Canvas · Conversor QTI</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Preguntas a Canvas, inicio"><span class="brand-icon" aria-hidden="true">Q</span> Preguntas a Canvas</a>
+    <span class="local-badge"><span class="dot"></span> Tus archivos se procesan aquí</span>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">TU BANCO DE PREGUNTAS, LISTO PARA IMPORTAR</p>
+      <h1 id="page-title">Del CSV a tu<br><span>próximo cuestionario.</span></h1>
+      <p class="lead">Prepara tus preguntas, revisa el banco y descarga un paquete QTI para Canvas. Sin instalaciones.</p>
+      <div class="type-tags" aria-label="Tipos de preguntas"><span>Opción única</span><span>Selección múltiple</span><span>Verdadero / falso</span><span>Respuesta corta</span><span>Espacio en blanco</span><span>Ensayo</span></div>
+    </section>
+
+    <div class="workspace">
+      <section class="converter panel" aria-labelledby="converter-title">
+        <div class="section-heading"><span class="step">01</span><div><h2 id="converter-title">Prepara tu paquete</h2><p>Un archivo, todas tus preguntas.</p></div></div>
+
+        <div class="runtime" id="runtime" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span><span id="runtime-text">Preparando el conversor. La primera carga puede tardar unos segundos…</span><button id="retry" class="text-button" hidden>Reintentar</button></div>
+
+        <div class="upload" id="dropzone">
+          <svg class="upload-icon" viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M15 34H11a7 7 0 0 1-1-14 14 14 0 0 1 27-3 9 9 0 0 1 0 18h-4M24 36V20m-6 6 6-6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <h3>Arrastra tu archivo CSV</h3>
+          <p>o selecciónalo desde tu equipo · hasta 10 MB</p>
+          <label for="csv-file" class="button secondary">Seleccionar CSV</label>
+          <input type="file" id="csv-file" accept=".csv,text/csv" class="visually-hidden" aria-describedby="file-note">
+          <p class="file-note" id="file-note">UTF-8 · separado por comas o punto y coma</p>
+        </div>
+        <div id="file-summary" class="file-summary" hidden><span aria-hidden="true">▤</span><div><strong id="file-name"></strong><span id="file-details"></span></div><button id="remove-file" class="text-button" aria-label="Quitar archivo">Quitar</button></div>
+        <div id="error" class="error" role="alert" hidden></div>
+
+        <div class="fields">
+          <label>Título del cuestionario<input id="exam-title" type="text" placeholder="Ej. Evaluación · Unidad 1" maxlength="200" autocomplete="off"></label>
+          <label>Formato de exportación<select id="qti-format"><option value="1.2">Canvas · QTI 1.2</option><option value="2.1">QTI 2.1</option></select><span class="field-help" id="format-help">Perfil con tipos y feedback explícitos para importar en Canvas.</span></label>
+        </div>
+
+        <button id="generate" class="button primary" disabled>Generar paquete QTI <span aria-hidden="true">↓</span></button>
+        <p class="privacy">El CSV y las respuestas permanecen en tu navegador. No se envían a un servidor.</p>
+        <div class="success" id="result" role="status" hidden><strong id="result-title">Tu paquete está listo</strong><p id="result-description"></p><a id="download" class="button secondary" download>Descargar ZIP</a></div>
+      </section>
+
+      <aside class="sidebar">
+        <section class="panel template-card" aria-labelledby="template-title"><span class="card-symbol" aria-hidden="true">▦</span><h2 id="template-title">Empieza con la plantilla</h2><p>Seis preguntas de ejemplo con respuestas, puntos y retroalimentación. Sustituye los ejemplos por tus preguntas.</p><a href="./plantilla_qti.csv" download class="button secondary">Descargar plantilla CSV <span aria-hidden="true">↓</span></a></section>
+        <section class="panel import-card" aria-labelledby="import-title"><p class="eyebrow">DESPUÉS DE CONVERTIR</p><h2 id="import-title">Llévalo a New Quizzes</h2><ol><li>Crea un nuevo cuestionario en Canvas.</li><li>Entra en <strong>Construir / Build</strong>.</li><li>Abre el menú ⋯ y elige <strong>Importar contenido</strong>.</li><li>Selecciona el ZIP y revisa preguntas, puntos y feedback.</li></ol><p class="small-note">La visibilidad del feedback también depende de los ajustes de resultados de Canvas.</p></section>
+      </aside>
+    </div>
+
+    <section class="panel preview" id="preview" aria-labelledby="preview-title" hidden>
+      <div class="section-heading"><span class="step">02</span><div><h2 id="preview-title">Revisa tu banco</h2><p id="preview-subtitle"></p></div><span class="total-points" id="total-points"></span></div>
+      <div id="type-summary" class="type-tags"></div>
+      <div id="question-list"></div>
+    </section>
+
+    <section class="guide" aria-labelledby="guide-title"><h2 id="guide-title">Un formato sencillo, con reglas claras.</h2><div class="guide-grid"><details><summary>¿Cómo completo un espacio en blanco?</summary><p>Usa el tipo <code>blank</code> y un marcador <code>{{respuesta}}</code> en el enunciado. Ejemplo: «La capital de Ecuador es {{respuesta}}». Escribe <code>Quito</code> en <code>correcta</code>. Se admite un espacio por pregunta.</p></details><details><summary>¿Cómo añado respuestas y feedback?</summary><p><code>feedback</code> contiene la explicación general. Usa <code>feedback_correcta</code>, <code>feedback_incorrecta</code> y <code>feedback_a</code> a <code>feedback_d</code> para comentarios específicos. En selección múltiple, escribe las letras correctas separadas por comas, como <code>a,c</code>.</p></details><details><summary>¿Cómo acepto varias respuestas de texto?</summary><p>Escribe la respuesta principal en <code>correcta</code> y las alternativas en la celda <code>respuestas_aceptadas</code>, como una lista JSON: <code>["Quito", "San Francisco de Quito"]</code>. No se distinguen mayúsculas; sí tildes y espacios.</p></details><details><summary>¿Qué debo revisar al importar?</summary><p>Comprueba el número de preguntas, sus tipos, respuestas, puntuación y feedback. El importador de Canvas puede reinterpretar contenido. En <code>ma</code> se exporta puntuación de todo o nada y en <code>essay</code> la corrección es manual.</p></details></div></section>
+  </main>
+  <footer><span>Preguntas a Canvas · Conversor CSV → QTI</span><span>Independiente de Canvas e Instructure.</span></footer>
+  <noscript>Activa JavaScript para convertir los archivos en tu navegador.</noscript>
+</body>
+</html>

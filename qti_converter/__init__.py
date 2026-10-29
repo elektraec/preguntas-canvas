@@ -1,0 +1,2 @@
+"""QTI converter desktop app."""
+
