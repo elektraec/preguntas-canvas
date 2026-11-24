@@ -7,7 +7,7 @@ from __future__ import annotations
 import xml.etree.ElementTree as ET
 from html import escape
 
-from qti_converter.questions import OPTION_KEYS, Question
+from qti_converter.questions import OPTION_KEYS, Question, split_code_blocks
 
 QTI12_NS = "http://www.imsglobal.org/xsd/ims_qtiasiv1p2"
 CANVAS_TYPES = {
@@ -19,6 +19,19 @@ CANVAS_TYPES = {
 
 def material(parent: ET.Element, text: str) -> None:
     ET.SubElement(ET.SubElement(parent, "material"), "mattext", texttype="text/plain").text = text
+
+
+def question_material(parent: ET.Element, text: str) -> None:
+    parts = split_code_blocks(text)
+    if not any(kind == "code" for kind, _ in parts):
+        material(parent, text)
+        return
+    html = "".join(
+        "<pre><code>" + escape(value) + "</code></pre>" if kind == "code"
+        else "<p>" + escape(value).replace("\n", "<br />") + "</p>"
+        for kind, value in parts
+    )
+    ET.SubElement(ET.SubElement(parent, "material"), "mattext", texttype="text/html").text = html
 
 
 def condition(parent: ET.Element, continue_: str = "Yes") -> tuple[ET.Element, ET.Element]:
@@ -42,13 +55,12 @@ def create_assessment(questions: list[Question], title: str) -> ET.Element:
             ET.SubElement(field, "fieldlabel").text = key
             ET.SubElement(field, "fieldentry").text = value
         presentation = ET.SubElement(item, "presentation")
+        text = question.text + ("\n```\n" + question.code + "\n```" if question.code else "")
         if question.tipo == "blank":
-            before, after = question.text.split("{{respuesta}}")
-            material(presentation, before)
+            before, after = text.split("{{respuesta}}")
+            question_material(presentation, before)
         else:
-            material(presentation, question.text)
-        if question.code:
-            ET.SubElement(ET.SubElement(presentation, "material"), "mattext", texttype="text/html").text = "<pre><code>" + escape(question.code) + "</code></pre>"
+            question_material(presentation, text)
         if question.tipo in {"mc", "ma", "tf"}:
             response = ET.SubElement(presentation, "response_lid", ident="response1",
                                      rcardinality="Multiple" if question.tipo == "ma" else "Single")
@@ -60,7 +72,7 @@ def create_assessment(questions: list[Question], title: str) -> ET.Element:
             response = ET.SubElement(presentation, "response_str", ident="response1", rcardinality="Single")
             ET.SubElement(ET.SubElement(response, "render_fib"), "response_label", ident="answer1", rshuffle="No")
             if question.tipo == "blank":
-                material(presentation, after)
+                question_material(presentation, after)
         processing = ET.SubElement(item, "resprocessing")
         ET.SubElement(ET.SubElement(processing, "outcomes"), "decvar", varname="SCORE", vartype="Decimal",
                       minvalue="0", maxvalue="100", defaultval="0")

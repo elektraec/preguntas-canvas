@@ -10,7 +10,7 @@ from pathlib import Path
 
 from qti_converter.questions import (
     OPTION_KEYS, REQUIRED_HEADERS, SUPPORTED_TYPES, Question, ValidationError,
-    infer_type, normalize_correct_answers, read_questions, validate_headers,
+    infer_type, normalize_correct_answers, read_questions, validate_headers, split_code_blocks,
 )
 
 QTI_NS = "http://www.imsglobal.org/xsd/imsqti_v2p1"
@@ -86,27 +86,29 @@ def create_question_xml(question: Question) -> ET.Element:
     for outcome, _, _ in definitions:
         sub(item, "outcomeDeclaration", identifier=outcome, cardinality="single", baseType="identifier")
     body = sub(item, "itemBody")
-    if question.tipo == "blank":
-        before, after = question.text.split("{{respuesta}}")
-        paragraph = sub(body, "p", before)
-        entry = sub(paragraph, "textEntryInteraction", responseIdentifier="RESPONSE", expectedLength="30")
-        entry.tail = after
-        if question.code:
-            sub(body, "pre", question.code)
-    else:
-        sub(body, "p", question.text)
-        if question.code:
-            sub(body, "pre", question.code)
-        if choice:
-            interaction = sub(body, "choiceInteraction", responseIdentifier="RESPONSE", shuffle="false",
-                              maxChoices="0" if question.tipo == "ma" else "1")
-            for key, text in question.options.items():
-                if text:
-                    sub(sub(interaction, "simpleChoice", identifier=key), "p", text)
-        elif question.tipo == "short":
-            sub(sub(body, "p"), "textEntryInteraction", responseIdentifier="RESPONSE", expectedLength="30")
+    # Render fenced code inside the question, preserving block order and indentation.
+    # The older optional codigo column is still accepted for existing CSV files.
+    text = question.text + ("\n```\n" + question.code + "\n```" if question.code else "")
+    for kind, content in split_code_blocks(text):
+        if kind == "code":
+            sub(body, "pre", content)
+        elif question.tipo == "blank" and "{{respuesta}}" in content:
+            before, after = content.split("{{respuesta}}")
+            paragraph = sub(body, "p", before)
+            entry = sub(paragraph, "textEntryInteraction", responseIdentifier="RESPONSE", expectedLength="30")
+            entry.tail = after
         else:
-            sub(body, "extendedTextInteraction", responseIdentifier="RESPONSE")
+            sub(body, "p", content)
+    if choice:
+        interaction = sub(body, "choiceInteraction", responseIdentifier="RESPONSE", shuffle="false",
+                          maxChoices="0" if question.tipo == "ma" else "1")
+        for key, text in question.options.items():
+            if text:
+                sub(sub(interaction, "simpleChoice", identifier=key), "p", text)
+    elif question.tipo == "short":
+        sub(sub(body, "p"), "textEntryInteraction", responseIdentifier="RESPONSE", expectedLength="30")
+    elif question.tipo == "essay":
+        sub(body, "extendedTextInteraction", responseIdentifier="RESPONSE")
     processing = sub(item, "responseProcessing")
     if question.tipo != "essay":
         condition = sub(processing, "responseCondition")

@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 TEMPLATE_HEADERS = [
-    "id", "titulo", "tipo", "pregunta", "codigo", "a", "b", "c", "d", "correcta",
+    "id", "titulo", "tipo", "pregunta", "a", "b", "c", "d", "correcta",
     "respuestas_aceptadas", "puntos", "feedback", "feedback_correcta",
     "feedback_incorrecta", "feedback_a", "feedback_b", "feedback_c", "feedback_d",
 ]
@@ -79,8 +79,7 @@ TEMPLATE_ROWS = [
         "id": "PREG006",
         "titulo": "Ejemplo con código Python",
         "tipo": "mc",
-        "pregunta": "¿Qué muestra el siguiente código?",
-        "codigo": "for numero in range(3):\n    print(numero)",
+        "pregunta": "¿Qué muestra el siguiente código?\n```python\nfor numero in range(3):\n    print(numero)\n```",
         "a": "0, 1, 2", "b": "1, 2, 3", "c": "0, 1, 2, 3",
         "correcta": "a", "puntos": "1",
         "feedback": "range(3) produce los números 0, 1 y 2.",

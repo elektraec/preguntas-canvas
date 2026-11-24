@@ -292,19 +292,25 @@ class QTITests(unittest.TestCase):
                     self.assertEqual(tree.tag, f"{{{QTI12_NS}}}questestinterop")
 
     def test_template_ids_and_code_in_both_formats(self):
+        from html import unescape
         from qti_converter.canvas_qti12 import create_assessment
         path = write_template(self.root / "template.csv")
         questions = read_questions(path)
         self.assertNotIn("short", [q.tipo for q in questions])
+        self.assertNotIn("codigo", TEMPLATE_HEADERS)
         self.assertEqual(len({q.identifier for q in questions}), len(questions))
-        code_question = next(q for q in questions if q.code)
-        self.assertEqual(code_question.code, "for numero in range(3):\n    print(numero)")
-        q21 = create_question_xml(code_question)
-        self.assertEqual(q21.find(f"{{{QTI_NS}}}itemBody/{{{QTI_NS}}}pre").text, code_question.code)
-        code_question.code = '    if x < 2:\n        print("a & b")'
-        item = create_assessment([code_question], "Python").find("assessment/section/item")
-        html = item.find("presentation/material/mattext[@texttype='text/html']").text
-        self.assertEqual(html, '<pre><code>    if x &lt; 2:\n        print(&quot;a &amp; b&quot;)</code></pre>')
+        q = next(q for q in questions if "```python" in q.text)
+        q21 = create_question_xml(q)
+        self.assertEqual(q21.find(f"{{{QTI_NS}}}itemBody/{{{QTI_NS}}}pre").text,
+                         "for numero in range(3):\n    print(numero)")
+        q.text = 'Texto\n```python\n    if x < 2:\n        print("a & b")\n```\n¿Qué ocurre?'
+        item = create_assessment([q], "Python").find("assessment/section/item")
+        materials = item.findall("presentation/material")
+        self.assertEqual(len(materials), 1)
+        html = materials[0].find("mattext[@texttype='text/html']").text
+        self.assertIn('<pre><code>    if x &lt; 2:\n        print(&quot;a &amp; b&quot;)</code></pre>', html)
+        self.assertIn("Texto", html)
+        self.assertIn("¿Qué ocurre?", html)
         for version in ("1.2", "2.1"):
             self.assertTrue(build_qti_package(path, "Python", self.root, version).zip_path.exists())
 

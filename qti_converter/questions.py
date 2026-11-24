@@ -32,6 +32,13 @@ class Question:
     code: str = ""
 
 
+def split_code_blocks(text: str) -> list[tuple[str, str]]:
+    """Split fenced blocks in the question; everything else stays literal text."""
+    parts = re.split(r"(?m)^```(?:[A-Za-z0-9_+.-]+)?[ \t]*\r?\n(.*?)^```[ \t]*(?:\r?\n|$)", text, flags=re.DOTALL)
+    return [("code" if index % 2 else "text", value.rstrip("\r\n") if index % 2 else value)
+            for index, value in enumerate(parts) if value]
+
+
 def infer_type(row: dict[str, str]) -> str:
     return row.get("tipo", "").strip().lower() or (
         "mc" if any(row.get(k, "").strip() for k in OPTION_KEYS) else "short"
@@ -116,6 +123,8 @@ def validate_question(row: dict[str, str], index: int) -> Question:
         raise ValidationError(f"Tipo no soportado: {tipo}. Usa mc, ma, tf, short, blank o essay.")
     if not row.get("pregunta"):
         raise ValidationError("Falta el texto de 'pregunta'.")
+    if tipo == "blank" and any("{{respuesta}}" in value for kind, value in split_code_blocks(row["pregunta"]) if kind == "code"):
+        raise ValidationError("El marcador {{respuesta}} debe estar fuera del bloque de código.")
     if tipo == "blank" and row["pregunta"].count("{{respuesta}}") != 1:
         raise ValidationError("blank requiere exactamente un marcador {{respuesta}} en 'pregunta'.")
     if tipo != "blank" and "{{respuesta}}" in row["pregunta"]:
