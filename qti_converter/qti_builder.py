@@ -91,8 +91,12 @@ def create_question_xml(question: Question) -> ET.Element:
         paragraph = sub(body, "p", before)
         entry = sub(paragraph, "textEntryInteraction", responseIdentifier="RESPONSE", expectedLength="30")
         entry.tail = after
+        if question.code:
+            sub(body, "pre", question.code)
     else:
         sub(body, "p", question.text)
+        if question.code:
+            sub(body, "pre", question.code)
         if choice:
             interaction = sub(body, "choiceInteraction", responseIdentifier="RESPONSE", shuffle="false",
                               maxChoices="0" if question.tipo == "ma" else "1")

@@ -2,7 +2,7 @@
 
 Web: **https://elektraec.github.io/preguntas-canvas/**
 
-Convierte archivos CSV en paquetes QTI para importar en Canvas. Incluye una interfaz web en español, plantilla con seis tipos, validación, vista previa, puntos y retroalimentación.
+Convierte archivos CSV en paquetes QTI para importar en Canvas. Incluye una interfaz web en español, plantilla con seis ejemplos, validación, vista previa, puntos y retroalimentación.
 
 ## Uso
 
@@ -28,7 +28,7 @@ Revisa el número de preguntas, las respuestas, puntos y feedback después de im
 Columnas de la plantilla:
 
 ```text
-id,titulo,tipo,pregunta,a,b,c,d,correcta,respuestas_aceptadas,puntos,feedback,feedback_correcta,feedback_incorrecta,feedback_a,feedback_b,feedback_c,feedback_d
+id,titulo,tipo,pregunta,codigo,a,b,c,d,correcta,respuestas_aceptadas,puntos,feedback,feedback_correcta,feedback_incorrecta,feedback_a,feedback_b,feedback_c,feedback_d
 ```
 
 - `puntos`: número mayor que cero, con punto decimal; por defecto 1.
@@ -37,6 +37,8 @@ id,titulo,tipo,pregunta,a,b,c,d,correcta,respuestas_aceptadas,puntos,feedback,fe
 - `id` y `titulo` son opcionales. Los identificadores, si se indican, deben ser únicos, comenzar con letra ASCII o `_` y usar letras ASCII, números, `_`, `.` o `-`.
 - En ensayo deja vacíos `correcta`, alternativas, opciones y feedback de acierto/error; admite feedback general.
 - La columna `correcta` debe existir, aunque su valor pueda estar vacío en ensayo o si se usan alternativas de texto.
+
+La columna `id` acepta identificadores únicos como `PREG001` y `PREG002` (o puede dejarse vacía). Usa la columna opcional `codigo` para incluir Python u otro código con saltos de línea y sangría; se muestra como bloque preformateado y no se ejecuta. Conserva las comillas y los saltos de línea con un editor CSV y revisa su presentación en Canvas.
 
 Las plantillas anteriores siguen siendo válidas. Se recomienda indicar el tipo explícitamente.
 

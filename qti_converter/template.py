@@ -5,13 +5,14 @@ from pathlib import Path
 
 
 TEMPLATE_HEADERS = [
-    "id", "titulo", "tipo", "pregunta", "a", "b", "c", "d", "correcta",
+    "id", "titulo", "tipo", "pregunta", "codigo", "a", "b", "c", "d", "correcta",
     "respuestas_aceptadas", "puntos", "feedback", "feedback_correcta",
     "feedback_incorrecta", "feedback_a", "feedback_b", "feedback_c", "feedback_d",
 ]
 
 TEMPLATE_ROWS = [
     {
+        "id": "PREG001",
         "titulo": "Ejemplo opcion multiple",
         "tipo": "mc",
         "pregunta": "Cual es la capital de Francia?",
@@ -27,6 +28,7 @@ TEMPLATE_ROWS = [
         "feedback_b": "Madrid es la capital de España.",
     },
     {
+        "id": "PREG002",
         "titulo": "Ejemplo selección múltiple",
         "tipo": "ma",
         "pregunta": "Selecciona todos los números pares.",
@@ -38,6 +40,7 @@ TEMPLATE_ROWS = [
         "feedback_incorrecta": "Debes seleccionar todos los pares y ningún impar.",
     },
     {
+        "id": "PREG003",
         "titulo": "Ejemplo verdadero falso",
         "tipo": "tf",
         "pregunta": "La Tierra gira alrededor del Sol.",
@@ -49,17 +52,7 @@ TEMPLATE_ROWS = [
         "feedback": "Es una afirmacion verdadera.",
     },
     {
-        "titulo": "Ejemplo respuesta corta",
-        "tipo": "short",
-        "pregunta": "Escribe la palabra hola.",
-        "a": "",
-        "b": "",
-        "c": "",
-        "d": "",
-        "correcta": "hola",
-        "feedback": "La respuesta esperada es hola.",
-    },
-    {
+        "id": "PREG004",
         "titulo": "Ejemplo espacio en blanco",
         "tipo": "blank",
         "pregunta": "La capital de Ecuador es {{respuesta}}.",
@@ -71,6 +64,7 @@ TEMPLATE_ROWS = [
         "feedback_incorrecta": "Guayaquil es otra ciudad del país; su capital es Quito.",
     },
     {
+        "id": "PREG005",
         "titulo": "Ejemplo ensayo",
         "tipo": "essay",
         "pregunta": "Explica con tus palabras que es la fotosintesis.",
@@ -80,6 +74,16 @@ TEMPLATE_ROWS = [
         "d": "",
         "correcta": "",
         "feedback": "Respuesta abierta para revision manual.",
+    },
+    {
+        "id": "PREG006",
+        "titulo": "Ejemplo con código Python",
+        "tipo": "mc",
+        "pregunta": "¿Qué muestra el siguiente código?",
+        "codigo": "for numero in range(3):\n    print(numero)",
+        "a": "0, 1, 2", "b": "1, 2, 3", "c": "0, 1, 2, 3",
+        "correcta": "a", "puntos": "1",
+        "feedback": "range(3) produce los números 0, 1 y 2.",
     }
 ]
 

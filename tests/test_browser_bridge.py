@@ -18,7 +18,7 @@ class BrowserBridgeTests(unittest.TestCase):
             common = {'input_path': str(source), 'filename': source.name}
             preview = json.loads(handle_request(json.dumps(common | {'action': 'analyze'})))
             self.assertEqual(preview['count'], 6)
-            self.assertEqual(set(preview['types']), {'mc', 'ma', 'tf', 'short', 'blank', 'essay'})
+            self.assertEqual(set(preview['types']), {'mc', 'ma', 'tf', 'blank', 'essay'})
             self.assertEqual(preview['suggested_title'], 'Banco De Prueba')
             for version in ('1.2', '2.1'):
                 result = json.loads(handle_request(json.dumps(common | {
@@ -40,3 +40,4 @@ class BrowserBridgeTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+

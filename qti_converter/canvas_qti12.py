@@ -5,6 +5,7 @@ This profile is an import alternative, not a guarantee of New Quizzes behavior.
 from __future__ import annotations
 
 import xml.etree.ElementTree as ET
+from html import escape
 
 from qti_converter.questions import OPTION_KEYS, Question
 
@@ -46,6 +47,8 @@ def create_assessment(questions: list[Question], title: str) -> ET.Element:
             material(presentation, before)
         else:
             material(presentation, question.text)
+        if question.code:
+            ET.SubElement(ET.SubElement(presentation, "material"), "mattext", texttype="text/html").text = "<pre><code>" + escape(question.code) + "</code></pre>"
         if question.tipo in {"mc", "ma", "tf"}:
             response = ET.SubElement(presentation, "response_lid", ident="response1",
                                      rcardinality="Multiple" if question.tipo == "ma" else "Single")

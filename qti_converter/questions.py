@@ -29,6 +29,7 @@ class Question:
     answers: list[str]
     points: float
     feedback: dict[str, str]
+    code: str = ""
 
 
 def infer_type(row: dict[str, str]) -> str:
@@ -86,7 +87,7 @@ def read_questions(path: Path) -> list[Question]:
             line = reader.line_num
             if None in raw:
                 raise ValidationError(f"La fila que termina en la línea {line} tiene columnas de más; revisa las comillas.")
-            row = {k.strip().lower(): (v or "").strip() for k, v in raw.items()}
+            row = {k.strip().lower(): (v or "").strip("\r\n") if k.strip().lower() == "codigo" else (v or "").strip() for k, v in raw.items()}
             if not any(row.values()):
                 continue
             if any(v is None for v in raw.values()):
@@ -175,4 +176,4 @@ def validate_question(row: dict[str, str], index: int) -> Question:
         if feedback[f"feedback_{key}"] and (tipo not in {"mc", "ma", "tf"} or not options[key]):
             raise ValidationError(f"feedback_{key} requiere una opción {key} existente.")
     return Question(identifier, row.get("titulo") or f"Pregunta {index}", tipo,
-                    row["pregunta"], options, answers, points, feedback)
+                    row["pregunta"], options, answers, points, feedback, row.get("codigo", ""))
